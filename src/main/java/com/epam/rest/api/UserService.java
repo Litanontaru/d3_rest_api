@@ -13,9 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Andrei_Yakushin
@@ -23,14 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Path("user")
 public class UserService {
-    private static final Map<String, User> USER_MAP = new ConcurrentHashMap<>();
-    private static final AtomicInteger NEXT_INDEX = new AtomicInteger(0);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public String read(@PathParam("id") String id) {
-        User user = USER_MAP.get(id);
+        User user = User.USER_MAP.get(id);
         Gson gson = new GsonBuilder().serializeNulls().create();
         return gson.toJson(user);
     }
@@ -39,11 +34,11 @@ public class UserService {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public String create(@PathParam("name") String name) {
-        String id = Integer.toString(NEXT_INDEX.getAndIncrement());
+        String id = Integer.toString(User.NEXT_INDEX.getAndIncrement());
         User user = new User();
         user.setName(name);
         user.setId(id);
-        USER_MAP.put(id, user);
+        User.USER_MAP.put(id, user);
         Gson gson = new GsonBuilder().create();
         return gson.toJson(user);
     }
@@ -53,7 +48,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public String update(@PathParam("id") String id, String modification) {
         Gson gson = new GsonBuilder().serializeNulls().create();
-        User user = USER_MAP.get(id);
+        User user = User.USER_MAP.get(id);
         if (user != null) {
             try {
                 User change = gson.fromJson(modification, User.class);
@@ -72,7 +67,7 @@ public class UserService {
     @Path("{id}")
     @Produces(MediaType.TEXT_PLAIN)
     public String delete(@PathParam("id") String id) {
-        User user = USER_MAP.remove(id);
+        User user = User.USER_MAP.remove(id);
         if (user == null) {
             return "Not found";
         } else {
